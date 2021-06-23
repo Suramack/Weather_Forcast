@@ -15,9 +15,10 @@ class _WeatherState extends State<Weather> {
   double _width = 0, _height = 0;
   List<int> _hourList = <int>[];
   String hour;
-  String railHour;
-  int dayTypeIndex;
-  double currentTemp;
+  String railHour, weatherStatus;
+  int dayTypeIndex, humidity, visibility;
+  double currentTemp, feelsLike, windSpeed;
+  double kelvin = -273.15;
   @override
   void initState() {
     super.initState();
@@ -26,6 +27,11 @@ class _WeatherState extends State<Weather> {
         getWeatherData(position.latitude, position.longitude).then((weather) {
           setState(() {
             currentTemp = weather.main.temp;
+            feelsLike = weather.main.feelsLike;
+            weatherStatus = weather.weather[0].status;
+            windSpeed = weather.wind.speed;
+            humidity = weather.main.humidity;
+            visibility = weather.visibility;
           });
         });
       });
@@ -139,7 +145,7 @@ class _WeatherState extends State<Weather> {
               ]),
           child: currentTemp == null
               ? SpinKitThreeBounce(
-                  color: Colors.grey,
+                  color: Colors.lightBlue,
                 )
               : Column(
                   children: [
@@ -159,7 +165,7 @@ class _WeatherState extends State<Weather> {
                           children: [
                             Container(
                               child: Text(
-                                '$currentTemp',
+                                (currentTemp + kelvin).toStringAsFixed(1),
                                 style: TextStyle(
                                   fontSize: 60,
                                   color: Colors.white,
@@ -167,7 +173,8 @@ class _WeatherState extends State<Weather> {
                               ),
                             ),
                             Text(
-                              "feels like",
+                              'Feels like ' +
+                                  (feelsLike + kelvin).toStringAsFixed(1),
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Colors.white,
@@ -183,7 +190,7 @@ class _WeatherState extends State<Weather> {
                       alignment: Alignment.topLeft,
                       padding: EdgeInsets.only(left: 20.0),
                       child: Text(
-                        'Rain Status',
+                        weatherStatus,
                         style: TextStyle(
                           fontSize: 35,
                           color: Colors.white,
@@ -215,88 +222,94 @@ class _WeatherState extends State<Weather> {
                   color: Colors.grey,
                 )
               ]),
-          child: Row(
-            children: [
-              Spacer(),
-              Container(
-                child: Column(
+          child: windSpeed == null
+              ? SpinKitThreeBounce(
+                  color: Colors.grey,
+                )
+              : Row(
                   children: [
                     Spacer(),
-                    Column(
-                      children: [
-                        Container(
-                          child: Text(
-                            'Wind',
-                            style: TextStyle(
-                                color: Colors.grey[400], fontSize: 15),
+                    Container(
+                      child: Column(
+                        children: [
+                          Spacer(),
+                          Column(
+                            children: [
+                              Container(
+                                child: Text(
+                                  'wind',
+                                  style: TextStyle(
+                                      color: Colors.grey[400], fontSize: 15),
+                                ),
+                              ),
+                              Container(
+                                child: Text(
+                                  windSpeed.toString() + 'm/s',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.values[6],
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Container(
-                          child: Text(
-                            '33m/h',
-                            style: TextStyle(
-                              fontWeight: FontWeight.values[6],
-                              fontSize: 18,
+                          Spacer(),
+                        ],
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
+                      child: Column(
+                        children: [
+                          Spacer(),
+                          Container(
+                            child: Text(
+                              'Humidity',
+                              style: TextStyle(
+                                  color: Colors.grey[400], fontSize: 15),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Spacer(),
-                  ],
-                ),
-              ),
-              Spacer(),
-              Container(
-                child: Column(
-                  children: [
-                    Spacer(),
-                    Container(
-                      child: Text(
-                        'Humidity',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      child: Text(
-                        '23km/h',
-                        style: TextStyle(
-                          fontWeight: FontWeight.values[6],
-                          fontSize: 18,
-                        ),
+                          Container(
+                            child: Text(
+                              humidity.toString() + '%',
+                              style: TextStyle(
+                                fontWeight: FontWeight.values[6],
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          Spacer(),
+                        ],
                       ),
                     ),
                     Spacer(),
-                  ],
-                ),
-              ),
-              Spacer(),
-              Container(
-                child: Column(
-                  children: [
-                    Spacer(),
                     Container(
-                      child: Text(
-                        'Visibility',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 15),
-                      ),
-                    ),
-                    Container(
-                      child: Text(
-                        '64%',
-                        style: TextStyle(
-                          fontWeight: FontWeight.values[6],
-                          fontSize: 18,
-                        ),
+                      child: Column(
+                        children: [
+                          Spacer(),
+                          Container(
+                            child: Text(
+                              'Visibility',
+                              style: TextStyle(
+                                  color: Colors.grey[400], fontSize: 15),
+                            ),
+                          ),
+                          Container(
+                            child: Text(
+                              visibility.toString(),
+                              style: TextStyle(
+                                fontWeight: FontWeight.values[6],
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          Spacer(),
+                        ],
                       ),
                     ),
                     Spacer(),
                   ],
                 ),
-              ),
-              Spacer(),
-            ],
-          ),
         ),
         //Today's Temporature
         SizedBox(
@@ -334,9 +347,6 @@ class _WeatherState extends State<Weather> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 border: Border(),
-                                // boxShadow: [
-                                //   BoxShadow(blurRadius: .3, color: Colors.grey)
-                                // ],
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Center(
